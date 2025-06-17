@@ -4,7 +4,7 @@
     <IsPublishable>false</IsPublishable>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>PanasonicPlcNet.NET</PackageId>
-    <Version>0.0.0</Version>
+    <Version>1.0.0</Version>
     <Authors>SeanJayZeng</Authors>
     <Company>SeanJayZeng</Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
