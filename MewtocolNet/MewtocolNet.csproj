@@ -1,20 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">github.com/SeanJayZeng/MewtocolNet
 	
   <PropertyGroup>
     <IsPublishable>false</IsPublishable>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>Mewtocol.NET</PackageId>
+    <PackageId>PanasonicPlcNet.NET</PackageId>
     <Version>0.0.0</Version>
-    <Authors>Felix Weiss</Authors>
-    <Company>OpenLogics</Company>
+    <Authors>SeanJayZeng</Authors>
+    <Company>SeanJayZeng</Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>A Mewtocol protocol library to interface with Panasonic PLCs over TCP/Serial.</Description>
-    <Copyright>Copyright (c) 2022 - 2023 OpenLogics</Copyright>
-    <PackageProjectUrl>https://github.com/OpenLogics/MewtocolNet</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/OpenLogics/MewtocolNet</RepositoryUrl>
+    <Copyright>Copyright (c) 2024 - 2025 SeanJayZeng</Copyright>
+    <PackageProjectUrl>https://github.com/SeanJayZeng/MewtocolNet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SeanJayZeng/MewtocolNet</RepositoryUrl>
     <PackageTags>plc;panasonic;mewtocol;automation;</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <UserSecretsId>2ccdcc9b-94a3-4e76-8827-453ab889ea33</UserSecretsId>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
