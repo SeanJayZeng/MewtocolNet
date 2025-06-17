@@ -57,24 +57,19 @@ namespace MewtocolNet.Registers {
         public override byte? GetSpecialAddress() => SpecialAddress;
 
         /// <inheritdoc/>
-        public override string GetMewName() {
+        public override string GetMewName()
+        {
+            var spAdressEnd = SpecialAddress.ToString("X1");               // A、B、C...
+            var addrPadded = MemoryAddress.ToString("D3");                 // "099", "010" 等
 
-            var spAdressEnd = SpecialAddress.ToString("X1");
-
-            if (MemoryAddress == 0) {
-
-                return $"{GetRegisterString()}{spAdressEnd}";
-
+            // 位寄存器需要加位号，例如 R099A
+            if (SpecialAddress != 0 || RegisterType.ToString() == "R" || RegisterType.ToString() == "X" || RegisterType.ToString() == "Y")
+            {
+                return $"{GetRegisterString()}{addrPadded}{spAdressEnd}";
             }
 
-            if (MemoryAddress > 0 && SpecialAddress != 0) {
-
-                return $"{GetRegisterString()}{MemoryAddress}{spAdressEnd}";
-
-            }
-
-            return $"{GetRegisterString()}{MemoryAddress}";
-
+            // 纯字地址（如 D100、DT200 等）
+            return $"{GetRegisterString()}{addrPadded}";
         }
 
         /// <inheritdoc/>
@@ -116,19 +111,30 @@ namespace MewtocolNet.Registers {
         /// <inheritdoc/>
         public async Task<bool> ReadAsync() {
 
-            var res = await attachedInterface.ReadAreaByteRangeAsync((int)MemoryAddress, (int)GetRegisterAddressLen() * 2);
-            if (res == null) throw new Exception($"Failed to read the register {this}");
+            var mewName = GetMewName(); // e.g. R099A
+            string cmd = $"%{attachedInterface.GetStationNumber()}#RCS{mewName}001";
 
+            var res = await attachedInterface.SendCommandInternalAsync(cmd);
+
+            if (!res.Success || string.IsNullOrWhiteSpace(res.Response))
+                throw new Exception($"Failed to read the register {this}");
+
+            // MEWTOCOL ASCII 的返回格式大致为: %01$RCSR099A0011\r
+            // 解析最后一位（‘1’ 或 ‘0’）
+            char lastChar = res.Response.Trim().Last(); // 去掉 \r 后取最后一位
+            bool result = lastChar == '1';
+
+            // 内存同步
             var matchingReg = attachedInterface.memoryManager.GetAllRegisters()
-            .FirstOrDefault(x => x.IsSameAddressAndType(this));
+                .FirstOrDefault(x => x.IsSameAddressAndType(this));
 
-            if (matchingReg != null) {
+            if (matchingReg != null)
+                matchingReg.underlyingMemory.SetUnderlyingBits(matchingReg, specialAddress, result);
 
-                matchingReg.underlyingMemory.SetUnderlyingBytes(matchingReg, res);
+            UpdateHoldingValue(result);
+            AddSuccessRead();
 
-            }
-
-            return (bool)SetValueFromBytes(res);
+            return result;
 
         }
 
