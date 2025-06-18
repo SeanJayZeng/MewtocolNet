@@ -109,32 +109,23 @@ namespace MewtocolNet.Registers {
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ReadAsync() {
+        public async Task<bool> ReadAsync()
+        {
+            var areaPrefix = (RegisterPrefix)(int)RegisterType;
+            var res = await attachedInterface.ReadAreaByteRangeAsync((int)MemoryAddress,(int)GetRegisterAddressLen() * 2 ,areaPrefix);
+            if (res == null) throw new Exception($"Failed to read the register {this}");
 
-            var mewName = GetMewName(); // e.g. R099A
-            string cmd = $"%{attachedInterface.GetStationNumber()}#RCS{mewName}001";
-
-            var res = await attachedInterface.SendCommandInternalAsync(cmd);
-
-            if (!res.Success || string.IsNullOrWhiteSpace(res.Response))
-                throw new Exception($"Failed to read the register {this}");
-
-            // MEWTOCOL ASCII 的返回格式大致为: %01$RCSR099A0011\r
-            // 解析最后一位（‘1’ 或 ‘0’）
-            char lastChar = res.Response.Trim().Last(); // 去掉 \r 后取最后一位
-            bool result = lastChar == '1';
-
-            // 内存同步
             var matchingReg = attachedInterface.memoryManager.GetAllRegisters()
-                .FirstOrDefault(x => x.IsSameAddressAndType(this));
+            .FirstOrDefault(x => x.IsSameAddressAndType(this));
 
             if (matchingReg != null)
-                matchingReg.underlyingMemory.SetUnderlyingBits(matchingReg, specialAddress, result);
+            {
 
-            UpdateHoldingValue(result);
-            AddSuccessRead();
+                matchingReg.underlyingMemory.SetUnderlyingBytes(matchingReg, res);
 
-            return result;
+            }
+
+            return (bool)SetValueFromBytes(res);
 
         }
 
